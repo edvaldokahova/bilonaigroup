@@ -8,7 +8,7 @@ export interface Trabalho {
 }
 
 export const portfolio: Trabalho[] = [
-  { nome: "LampTech", categoria: "Loja de TV Box · Angola", img: "/portfolio/lamptech.webp", url: "" }, // PREENCHER url
-  { nome: "Gídia", categoria: "Comunicação e marketing · Lubango", img: "/portfolio/gidia.webp", url: "" }, // PREENCHER url
-  { nome: "Angola Business Academy", categoria: "Consultoria e formação · Luanda", img: "/portfolio/aba.webp", url: "https://aba-opal.vercel.app" },
+  { nome: "LampTech", categoria: "Loja de TV Box · Angola", img: "/portfolio/lamptech.webp", url: "" },
+  { nome: "Gídia", categoria: "Comunicação e marketing · Lubango", img: "/portfolio/gidia.webp", url: "" },
+  { nome: "Angola Business Academy", categoria: "Consultoria e formação · Luanda", img: "/portfolio/aba.webp", url: "" },
 ];

@@ -26,5 +26,4 @@ Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D:
 
 ## Por preencher
 
-- Links da LampTech e da Gídia em `lib/portfolio.ts` (marcados `// PREENCHER`).
 - `NEXT_PUBLIC_SITE_URL` na Vercel quando houver domínio próprio.
