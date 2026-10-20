@@ -22,9 +22,9 @@ Site 3D da agência, sem base de dados. O cliente responde a 8 perguntas, vê o 
 
 ## Técnica
 
-Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D: o 3D é feito com CSS 3D + WebGL leve (`components/GoldField.tsx`, `components/Device3D.tsx`, `components/Montagem.tsx`). Deploy automático na Vercel a cada envio para o GitHub.
+Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D: o 3D é feito com CSS 3D + WebGL leve (`components/GoldField.tsx`, `components/Montagem.tsx`). Deploy automático na Vercel a cada envio para o GitHub.
 
 ## Por preencher
 
-- Links e capturas dos trabalhos em `lib/portfolio.ts` (marcados `// PREENCHER`).
+- Links da LampTech e da Gídia em `lib/portfolio.ts` (marcados `// PREENCHER`).
 - `NEXT_PUBLIC_SITE_URL` na Vercel quando houver domínio próprio.
