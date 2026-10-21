@@ -10,6 +10,9 @@ Site 3D da agência, sem base de dados. O cliente responde a 8 perguntas, vê o 
 | Preços (sites, lojas, emails, renovações) | `lib/pricing.ts` (única fonte de preços) |
 | Perguntas, opções, cores, funcionalidades, regra de prazo 24 h / 48 h | `lib/fluxo.ts` |
 | Texto da mensagem que vai para o WhatsApp | `lib/whatsapp.ts` |
+| Dados de pagamento da fatura (Multicaixa Express, banco, titular, IBAN) | `lib/brand.ts` → `pagamento` |
+| Fatura pró-forma em PDF (layout, validade, condições) | `lib/fatura.ts` |
+| Cláusulas prontas dos termos de serviço do site do cliente | `lib/fluxo.ts` → `CLAUSULAS` |
 | Trabalhos do portfólio (nome, categoria, link, captura) | `lib/portfolio.ts` + imagens em `public/portfolio/` |
 | Termos e privacidade | `app/termos/page.tsx`, `app/privacidade/page.tsx` |
 | Imagem de partilha (WhatsApp, Facebook…) | `public/og.jpg` (1200×630) |
@@ -26,4 +29,5 @@ Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D:
 
 ## Por preencher
 
+- Banco, titular e IBAN em `lib/brand.ts` (`pagamento`). Enquanto estiverem vazios, a fatura mostra só o Multicaixa Express.
 - `NEXT_PUBLIC_SITE_URL` na Vercel quando houver domínio próprio.

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Globe, ShoppingBag, Newspaper, LayoutDashboard, MousePointerClick, ReceiptText, Send, PackageCheck, ShieldCheck, FileCheck2, Smartphone, Headset, Check } from "lucide-react";
 import { PRECOS, formatKz } from "@/lib/pricing";
-import { brand, waLink } from "@/lib/brand";
+import { waLink } from "@/lib/brand";
 import Reveal from "./Reveal";
 import Tilt from "./Tilt";
 import GoldField from "./GoldField";
@@ -173,8 +173,8 @@ export function CtaFinal() {
           <p className="mx-auto mt-7 max-w-lg text-cream/70">2 minutos para descrever. Orçamento na hora. Site no ar em 24 a 48 horas.</p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/comecar" className="btn-gold text-[17px]">Começar o meu projecto <ArrowRight size={18} /></Link>
-            <a href={waLink(`Olá, ${brand.agente.split(" ")[0]}! Tenho uma dúvida sobre um projecto.`)} target="_blank" rel="noopener noreferrer" className="btn-ghost">
-              <WaIcon size={18} className="text-wa" /> Falar com o {brand.agente.split(" ")[0]}
+            <a href={waLink(`Olá! Tenho uma dúvida sobre um projecto.`)} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+              <WaIcon size={18} className="text-wa" /> Falar com o agente oficial
             </a>
           </div>
         </Reveal>

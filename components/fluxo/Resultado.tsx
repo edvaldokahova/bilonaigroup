@@ -2,7 +2,7 @@
 // Veredito: o projecto montado, a estratégia, as prioridades, o orçamento, os termos e o botão de WhatsApp.
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Clock, Copy, ExternalLink, Paperclip, PenLine, Send, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Check, Clock, Copy, ExternalLink, FileDown, Loader2, Paperclip, PenLine, Send, ShieldCheck, Sparkles } from "lucide-react";
 import Logo from "../Logo";
 import WaIcon from "../WaIcon";
 import Previa from "./Previa";
@@ -21,6 +21,7 @@ import {
   tituloTipo,
 } from "@/lib/fluxo";
 import { pedidoWhatsApp } from "@/lib/whatsapp";
+import { baixarFatura, datasFatura } from "@/lib/fatura";
 
 const eur = (kz: number) => `≈ ${formatEur(kzParaEur(kz, brand.taxaKzPorEur))}`;
 
@@ -34,6 +35,33 @@ export default function Resultado({ r, onEditar }: { r: Respostas; onEditar: () 
   const [enviado, setEnviado] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [barras, setBarras] = useState(false);
+  const [aGerar, setAGerar] = useState(false);
+  const [erroFatura, setErroFatura] = useState(false);
+
+  const fatura = async () => {
+    if (!aceite || aGerar) return;
+    setAGerar(true);
+    setErroFatura(false);
+    try {
+      await baixarFatura(r, aceite);
+    } catch {
+      setErroFatura(true);
+    } finally {
+      setAGerar(false);
+    }
+  };
+  const botaoFatura = (className = "") =>
+    aceite ? (
+      <div className={className}>
+        <button type="button" onClick={fatura} disabled={aGerar} className="btn-ghost w-full text-sm">
+          {aGerar ? <Loader2 size={17} className="animate-spin" /> : <FileDown size={17} className="text-gold" />}
+          {aGerar ? "A preparar a fatura…" : "Baixar fatura pró-forma (PDF)"}
+        </button>
+        <p className="mt-2 text-center text-xs text-cream-dim">
+          {erroFatura ? "Não foi possível gerar o PDF. Tenta de novo ou pede-a no WhatsApp." : `N.º ${datasFatura(r, aceite).numero} · válida até ${datasFatura(r, aceite).vencimentoTxt} · com os dados de pagamento`}
+        </p>
+      </div>
+    ) : null;
 
   useEffect(() => {
     const t = window.setTimeout(() => setBarras(true), 250);
@@ -78,11 +106,12 @@ export default function Resultado({ r, onEditar }: { r: Respostas; onEditar: () 
             </li>
             <li className="flex gap-4 rounded-2xl border border-white/10 bg-night-2 p-4">
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/50 text-gold"><Clock size={16} /></span>
-              <span><b className="block">O {brand.agente.split(" ")[0]} responde-te</b><span className="text-sm text-cream/60">Assim que enviares, confirmamos tudo e começamos.</span></span>
+              <span><b className="block">O nosso agente oficial responde-te</b><span className="text-sm text-cream/60">Assim que enviares, confirmamos tudo e começamos.</span></span>
             </li>
           </ol>
           <div className="mt-8 grid gap-3">
             <a href={pedido.link} target="_blank" rel="noopener noreferrer" className="btn-wa"><WaIcon size={22} /> Abrir o WhatsApp de novo</a>
+            {botaoFatura()}
             <div className="grid grid-cols-2 gap-3">
               <button type="button" onClick={copiar} className="btn-ghost text-sm">{copiado ? <><Check size={16} /> Copiada</> : <><Copy size={16} /> Copiar texto</>}</button>
               <button type="button" onClick={() => setEnviado(false)} className="btn-ghost text-sm"><ArrowLeft size={16} /> Ver resumo</button>
@@ -200,7 +229,8 @@ export default function Resultado({ r, onEditar }: { r: Respostas; onEditar: () 
               >
                 <WaIcon size={24} /> Enviar o meu pedido no WhatsApp
               </a>
-              <p className="mt-3 text-center text-xs text-cream-dim">{pedido ? "A mensagem vai pronta. Só carregas em Enviar." : "Aceita os termos para activar o botão."}</p>
+              <p className="mt-3 text-center text-xs text-cream-dim">{pedido ? "A mensagem vai pronta. Só carregas em Enviar." : "Aceita os termos para activar o botão e a fatura."}</p>
+              {botaoFatura("mt-5 border-t border-white/10 pt-5")}
             </div>
           </div>
         </div>

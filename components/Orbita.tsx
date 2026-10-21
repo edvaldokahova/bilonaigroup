@@ -3,7 +3,8 @@
 // "hero": abre do logótipo plano para um giroscópio de ouro e segue o rato e o scroll.
 // "analise": faz o caminho inverso, o giroscópio fecha-se no logótipo à medida que `progresso` vai de 0 a 1.
 // "cta": giroscópio livre, mais calmo.
-// Sem WebGL, máquina fraca ou movimento reduzido → mostra o símbolo estático (poster) com brilho.
+// Corre sempre que o navegador tem WebGL: em telemóveis fracos ou com poupança de dados baixa a qualidade,
+// com "movimento reduzido" anda mais devagar. Sem WebGL, o símbolo em SVG gira em CSS (nunca fica parado).
 import { useEffect, useRef, useState } from "react";
 
 type Modo = "hero" | "analise" | "cta";
@@ -139,15 +140,13 @@ const PUPILA = 0.225;
 
 const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
-function podeUsar3D() {
+/** Aparelho modesto (poucos núcleos, pouca memória ou poupança de dados) → menos polígonos e resolução 1x. */
+function aparelhoLeve() {
   try {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
     const n = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (n.connection?.saveData) return false;
-    if ((n.hardwareConcurrency || 4) <= 2 || (n.deviceMemory ?? 4) < 2) return false;
-    return true;
+    return !!n.connection?.saveData || (n.hardwareConcurrency || 4) <= 4 || (n.deviceMemory ?? 4) < 4;
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -159,23 +158,33 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
 
   useEffect(() => {
     const c = ref.current;
-    if (!c || !podeUsar3D()) return;
+    if (!c) return;
     const mobile = window.innerWidth < 768;
+    const leve = aparelhoLeve();
+    let calmo = false;
+    try { calmo = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { /* sem matchMedia */ }
     let gl: WebGLRenderingContext | null = null;
     try {
-      gl = c.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: mobile ? "low-power" : "high-performance" });
+      gl = (c.getContext("webgl", { alpha: true, antialias: !leve, premultipliedAlpha: true, powerPreference: mobile ? "low-power" : "high-performance" }) ||
+        c.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: true })) as WebGLRenderingContext | null;
     } catch {
       gl = null;
     }
     if (!gl) return;
     const g = gl;
 
-    const sh = (t: number, s: string) => { const o = g.createShader(t)!; g.shaderSource(o, s); g.compileShader(o); return o; };
+    const sh = (t: number, s: string) => {
+      const o = g.createShader(t)!;
+      g.shaderSource(o, s);
+      g.compileShader(o);
+      if (!g.getShaderParameter(o, g.COMPILE_STATUS)) console.warn("Orbita: shader", g.getShaderInfoLog(o));
+      return o;
+    };
     const pr = g.createProgram()!;
     g.attachShader(pr, sh(g.VERTEX_SHADER, VS));
     g.attachShader(pr, sh(g.FRAGMENT_SHADER, FS.replace("precision highp", g.getShaderPrecisionFormat(g.FRAGMENT_SHADER, g.HIGH_FLOAT)?.precision ? "precision highp" : "precision mediump")));
     g.linkProgram(pr);
-    if (!g.getProgramParameter(pr, g.LINK_STATUS)) return;
+    if (!g.getProgramParameter(pr, g.LINK_STATUS)) { console.warn("Orbita:", g.getProgramInfoLog(pr)); return; }
     g.useProgram(pr);
 
     const aP = g.getAttribLocation(pr, "p"), aN = g.getAttribLocation(pr, "n");
@@ -189,7 +198,7 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, ib); g.bufferData(g.ELEMENT_ARRAY_BUFFER, m.idx, g.STATIC_DRAW);
       return { vb, nb, ib, n: m.idx.length };
     };
-    const q = mobile ? 0.6 : 1;
+    const q = leve ? 0.45 : mobile ? 0.6 : 1;
     const aneis = ANEIS.map((a) => subir(arco(a.R, a.r, a.a0, a.a1, Math.round(150 * q), Math.round(22 * q))));
     const orbita = subir(arco(1.55, 0.007, 0, Math.PI * 2, Math.round(160 * q), 8));
     const bola = subir(esfera(Math.round(36 * q), Math.round(24 * q)));
@@ -200,7 +209,7 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
     g.enableVertexAttribArray(aP);
     g.enableVertexAttribArray(aN);
 
-    const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, leve ? 1 : mobile ? 1.5 : 2);
     let asp = 1;
     const resize = () => {
       const w = c.clientWidth, h = c.clientHeight;
@@ -220,6 +229,18 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       rato.ty = (e.clientY / window.innerHeight) * 2 - 1;
     };
     window.addEventListener("pointermove", onMove, { passive: true });
+    // No telemóvel: arrastar o dedo sobre a escultura inclina-a; ao largar, volta devagar ao centro.
+    const onToque = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      const b = c.getBoundingClientRect();
+      rato.tx = Math.max(-1, Math.min(1, ((e.clientX - b.left) / b.width) * 2 - 1)) * 1.6;
+      rato.ty = Math.max(-1, Math.min(1, ((e.clientY - b.top) / b.height) * 2 - 1));
+    };
+    const onLargar = (e: PointerEvent) => { if (e.pointerType !== "mouse") { rato.tx = 0; rato.ty = 0; } };
+    c.addEventListener("pointermove", onToque, { passive: true });
+    c.addEventListener("pointerdown", onToque, { passive: true });
+    c.addEventListener("pointerup", onLargar, { passive: true });
+    c.addEventListener("pointercancel", onLargar, { passive: true });
 
     const camZ = 6.4;
     const cam = new Float32Array([0, 0, camZ]);
@@ -238,12 +259,12 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
 
     const t0 = performance.now();
     const frame = () => {
-      const t = (performance.now() - t0) / 1000;
+      const t = ((performance.now() - t0) / 1000) * (calmo ? 0.5 : 1);
       rato.x += (rato.tx - rato.x) * 0.05;
       rato.y += (rato.ty - rato.y) * 0.05;
 
       // Abrir/fechar: o hero começa no logótipo e abre-se; a análise fecha-se no logótipo.
-      if (modo === "hero") fecho = 1 - ease((t - 0.5) / 2.4);
+      if (modo === "hero") fecho = 1 - ease((t - 0.35) / 2.2);
       else if (modo === "cta") fecho = 0;
       else fecho += (ease(prog.current) - fecho) * 0.06;
       const k = 1 - fecho;
@@ -260,13 +281,14 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       g.clear(g.COLOR_BUFFER_BIT | g.DEPTH_BUFFER_BIT);
 
       const grupo = mul(
-        mul(rotY(k * (rato.x * 0.45 + Math.sin(t * 0.21) * 0.12)), rotX(k * (rato.y * 0.3 + Math.sin(t * 0.17) * 0.08) + sp * 0.9)),
+        // rotY com t: a escultura roda devagar sobre si própria (efeito "plataforma giratória").
+        mul(rotY(k * (t * 0.32 * vel + rato.x * 0.45)), rotX(k * (rato.y * 0.3 + Math.sin(t * 0.17) * 0.12) + sp * 0.9)),
         scale(1 + sp * 0.25 + k * (0.1 + 0.04 * Math.sin(t * 0.6))),
       );
       // Anel exterior e interior em eixos diferentes: o "giroscópio".
       const livre = [
-        [1.05 + 0.22 * Math.sin(t * 0.31 * vel), 0.35 * Math.sin(t * 0.23 * vel), t * 0.16 * vel],
-        [-0.55 + 0.25 * Math.sin(t * 0.27 * vel + 1), 1.15 + 0.2 * Math.sin(t * 0.19 * vel), -t * 0.24 * vel],
+        [1.05 + 0.3 * Math.sin(t * 0.4 * vel), 0.4 * Math.sin(t * 0.3 * vel), t * 0.35 * vel],
+        [-0.55 + 0.35 * Math.sin(t * 0.36 * vel + 1), 1.15 + 0.3 * Math.sin(t * 0.26 * vel), -t * 0.5 * vel],
       ];
       ANEIS.forEach((a, i) => {
         const [x, y, z] = livre[i];
@@ -301,6 +323,10 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      c.removeEventListener("pointermove", onToque);
+      c.removeEventListener("pointerdown", onToque);
+      c.removeEventListener("pointerup", onLargar);
+      c.removeEventListener("pointercancel", onLargar);
       document.removeEventListener("visibilitychange", onVis);
       g.getExtension("WEBGL_lose_context")?.loseContext();
     };
@@ -319,11 +345,11 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
             <stop offset="1" stopColor="#A67C1A" />
           </linearGradient>
         </defs>
-        <circle r="40" stroke="url(#orb-gold)" strokeWidth="6" strokeLinecap="round" strokeDasharray="205 46.33" transform="rotate(-60)" />
-        <circle r="25" stroke="url(#orb-gold)" strokeWidth="5" strokeLinecap="round" strokeDasharray="120 37.08" transform="rotate(120)" />
+        <g className="orb-gira"><circle r="40" stroke="url(#orb-gold)" strokeWidth="6" strokeLinecap="round" strokeDasharray="205 46.33" transform="rotate(-60)" /></g>
+        <g className="orb-gira orb-inv"><circle r="25" stroke="url(#orb-gold)" strokeWidth="5" strokeLinecap="round" strokeDasharray="120 37.08" transform="rotate(120)" /></g>
         <circle r="9" fill="#F4EFE6" />
       </svg>
-      <canvas ref={ref} className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${pronto ? "opacity-100" : "opacity-0"}`} />
+      <canvas ref={ref} className={`absolute inset-0 h-full w-full touch-pan-y transition-opacity duration-700 ${pronto ? "opacity-100" : "opacity-0"}`} />
     </div>
   );
 }

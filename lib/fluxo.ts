@@ -24,6 +24,10 @@ export interface Respostas {
   facebook: string;
   cidade: string;
   trafego: Trafego | null;
+  denominacao: string; // denominação social (opcional)
+  nif: string; // NIF (opcional)
+  termos: string[]; // ids das cláusulas escolhidas para os termos de serviço do site do cliente
+  notasTermos: string;
 }
 
 export const RESPOSTAS_INICIAIS: Respostas = {
@@ -44,6 +48,10 @@ export const RESPOSTAS_INICIAIS: Respostas = {
   facebook: "",
   cidade: "",
   trafego: null,
+  denominacao: "",
+  nif: "",
+  termos: [],
+  notasTermos: "",
 };
 
 export const TIPOS: { id: Tipo; titulo: string; desc: string }[] = [
@@ -150,6 +158,7 @@ export function estrategiaDe(r: Respostas): string[] {
   if (r.funcs.includes("whatsapp") || r.tipo !== "sistema") pts.push("Botões de WhatsApp com mensagem pronta, para converter visitas em conversas.");
   if (precisaBD(r)) pts.push("Painel de gestão próprio: alteras conteúdos e acompanhas tudo sem depender de ninguém.");
   if (r.trafego === "sim" || r.trafego === "talvez") pts.push("Preparado para anúncios no Facebook, Instagram e Google desde o primeiro dia.");
+  if (termosEscolhidos(r).length) pts.push(`Página de termos de serviço redigida a partir das ${termosEscolhidos(r).length} regras que escolheste.`);
   pts.push("Optimizado para Google (SEO), carregamento rápido e imagem de partilha nas redes.");
   return pts.slice(0, 5);
 }
@@ -175,4 +184,56 @@ export function anexosDe(r: Respostas): string[] {
   a.push("Fotos do espaço, da equipa ou tuas (as que queres no site)");
   if (r.paleta === "logo") a.push("O logótipo em boa qualidade (usamos as cores dele)");
   return a;
+}
+
+// ---------- Termos de serviço do site do cliente ----------
+// Cláusulas prontas: o cliente só escolhe as que se aplicam. {n} é substituído pelo nome do negócio.
+// para = tipos de projecto onde aparecem; func = aparecem também se essa funcionalidade foi escolhida.
+export interface Clausula {
+  id: string;
+  curto: string; // resumo usado na mensagem de WhatsApp
+  texto: string;
+  para: Tipo[];
+  func?: string;
+}
+
+const TODOS: Tipo[] = ["site", "loja", "blog", "sistema"];
+
+export const CLAUSULAS: Clausula[] = [
+  { id: "autoria", curto: "Direitos sobre os conteúdos", texto: "Os textos, imagens e marca deste site pertencem a {n} e não podem ser copiados sem autorização.", para: TODOS },
+  { id: "precos", curto: "Preços podem mudar", texto: "Os preços e as informações apresentadas podem ser actualizados sem aviso prévio.", para: ["site", "loja", "sistema"] },
+  { id: "dados", curto: "Uso dos dados dos visitantes", texto: "Os dados enviados pelos visitantes são usados apenas para responder aos seus pedidos e nunca são vendidos.", para: TODOS },
+  { id: "reclamacoes", curto: "Dúvidas e reclamações", texto: "Dúvidas e reclamações são tratadas pelos contactos oficiais indicados neste site.", para: TODOS },
+  { id: "orcamentos", curto: "Orçamentos sem compromisso", texto: "Os orçamentos pedidos pelo site só se tornam compromisso depois de confirmados por escrito.", para: ["site", "sistema"] },
+  { id: "horario", curto: "Resposta em horário de expediente", texto: "Os pedidos de contacto são respondidos em horário de expediente.", para: ["site", "loja", "sistema"] },
+  { id: "servicos", curto: "Condições acordadas por cliente", texto: "Os serviços são prestados de acordo com as condições acordadas com cada cliente.", para: ["site", "sistema"] },
+  { id: "confirmacao", curto: "Encomenda confirmada após pagamento", texto: "As encomendas só ficam confirmadas depois de confirmado o pagamento.", para: ["loja"], func: "catalogo" },
+  { id: "entregas", curto: "Prazos de entrega indicativos", texto: "Os prazos de entrega são indicativos e dependem da zona de entrega.", para: ["loja"] },
+  { id: "portes", curto: "Custos de entrega informados antes", texto: "Os custos de entrega são indicados ao cliente antes de confirmar o pedido.", para: ["loja"] },
+  { id: "trocas", curto: "Trocas em 7 dias", texto: "Aceitamos trocas ou devoluções até 7 dias após a entrega, com o produto em perfeito estado e o comprovativo de compra.", para: ["loja"] },
+  { id: "sem-trocas", curto: "Sem devolução de personalizados/perecíveis", texto: "Não são aceites devoluções de produtos personalizados ou perecíveis.", para: ["loja"] },
+  { id: "fotos", curto: "Fotos ilustrativas", texto: "As fotos dos produtos são ilustrativas e podem existir pequenas diferenças de cor ou acabamento.", para: ["loja"], func: "catalogo" },
+  { id: "informativo", curto: "Artigos informativos", texto: "Os artigos têm carácter informativo e não substituem aconselhamento profissional.", para: ["blog"], func: "noticias" },
+  { id: "comentarios", curto: "Moderação de comentários", texto: "Comentários ofensivos, enganosos ou publicitários podem ser removidos.", para: ["blog"], func: "noticias" },
+  { id: "partilha", curto: "Partilha com indicação da fonte", texto: "A partilha de artigos é permitida desde que seja indicada a fonte.", para: ["blog"], func: "noticias" },
+  { id: "conta", curto: "Responsabilidade pela conta", texto: "Cada utilizador é responsável por manter confidenciais os dados de acesso à sua conta.", para: ["sistema"], func: "clientes" },
+  { id: "suspensao", curto: "Suspensão por uso indevido", texto: "O acesso pode ser suspenso em caso de uso indevido ou violação destes termos.", para: ["sistema"], func: "clientes" },
+  { id: "marcacoes", curto: "Cancelamento até 24 h antes", texto: "As marcações podem ser alteradas ou canceladas até 24 horas antes da hora marcada.", para: ["sistema"], func: "marcacoes" },
+  { id: "faltas", curto: "Faltas sem aviso", texto: "Faltas sem aviso prévio podem impedir novas marcações online.", para: ["sistema"], func: "marcacoes" },
+  { id: "confidencial", curto: "Dados tratados com confidencialidade", texto: "Os dados guardados no sistema são tratados com confidencialidade e só pessoas autorizadas lhes têm acesso.", para: ["sistema"], func: "clientes" },
+];
+
+/** Cláusulas a mostrar conforme o tipo de projecto e as funcionalidades escolhidas. */
+export function clausulasPara(r: Respostas): Clausula[] {
+  const t = r.tipo ?? "site";
+  return CLAUSULAS.filter((c) => c.para.includes(t) || (c.func && r.funcs.includes(c.func)));
+}
+
+export function textoClausula(c: Clausula, r: Respostas) {
+  return c.texto.replace("{n}", r.negocio.trim() || "o negócio");
+}
+
+/** Só as escolhidas que ainda se aplicam (se o cliente mudar de tipo, as outras deixam de contar). */
+export function termosEscolhidos(r: Respostas): Clausula[] {
+  return clausulasPara(r).filter((c) => r.termos.includes(c.id));
 }

@@ -11,7 +11,9 @@ import {
   tituloTipo,
   paletaDe,
   estiloDe,
+  termosEscolhidos,
 } from "./fluxo";
+import { datasFatura } from "./fatura";
 
 const LIMITE_URL = 4000; // tamanho máximo seguro do texto já codificado no link wa.me
 
@@ -34,7 +36,7 @@ export function montarMensagem(r: Respostas, aceiteEm: Date, maxLivre = 160): st
   const nome = corta(r.nome, 60) || "um cliente";
   const neg = corta(r.negocio, 60);
 
-  linhas.push(`Olá, ${brand.agente.split(" ")[0]}! 👋 Sou ${nome}${neg ? `, do negócio *${neg}*` : ""}.`);
+  linhas.push(`Olá! 👋 Sou ${nome}${neg ? `, do negócio *${neg}*` : ""}.`);
   linhas.push(`Fiz o meu pedido no site da ${brand.nome} e quero avançar:`);
   linhas.push("");
   linhas.push(`🧩 *Projecto:* ${tituloTipo(r.tipo)}${r.ramo ? ` — ${r.ramo}` : ""}`);
@@ -51,12 +53,19 @@ export function montarMensagem(r: Respostas, aceiteEm: Date, maxLivre = 160): st
     r.facebook.trim() && `FB ${corta(r.facebook, 60)}`,
   ].filter(Boolean);
   if (contactos.length) linhas.push(`📇 *Contactos do negócio:* ${contactos.join(" · ")}`);
+  const legais = [corta(r.denominacao, 80), r.nif.trim() && `NIF ${corta(r.nif, 20)}`].filter(Boolean);
+  if (legais.length) linhas.push(`🏛 *Dados legais:* ${legais.join(" · ")}`);
+  const termos = termosEscolhidos(r);
+  if (termos.length) linhas.push(`📜 *Termos do meu site:* ${termos.map((c) => c.curto).join("; ")}`);
+  if (r.notasTermos.trim()) linhas.push(`📝 *Notas:* ${corta(r.notasTermos, maxLivre)}`);
   if (r.trafego) linhas.push(`📣 *Anúncios (tráfego pago):* ${{ sim: "Sim, quero", talvez: "Talvez, quero saber mais", nao: "Agora não" }[r.trafego]}`);
   linhas.push("");
   linhas.push(`💰 *Total a pagar:* ${formatKz(o.total)}${pt ? ` (${eur(o.total)})` : ""}`);
   if (o.emailsExtraTotal > 0) linhas.push(`   (base ${formatKz(o.base)} + emails ${formatKz(o.emailsExtraTotal)})`);
   if (o.anual.total > 0) linhas.push(`🔁 Renovação anual a partir do 2.º ano: ${formatKz(o.anual.total)}${pt ? ` (${eur(o.anual.total)})` : ""}`);
   linhas.push(`⏱ *Prazo:* ${prazoDe(r)}`);
+  const f = datasFatura(r, aceiteEm);
+  linhas.push(`🧾 *Fatura pró-forma:* ${f.numero} (válida até ${f.vencimentoTxt})`);
   linhas.push("");
   const data = aceiteEm.toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" });
   linhas.push(`✅ Li e aceitei os termos (pagamento só depois da entrega; 15 dias + 5 de tolerância) em ${data}.`);

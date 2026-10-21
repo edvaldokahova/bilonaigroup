@@ -19,12 +19,14 @@ import {
   orcamentoDe,
   precisaBD,
   dominioEfectivo,
+  clausulasPara,
+  textoClausula,
 } from "@/lib/fluxo";
 import { PRECOS, calcularOrcamento, formatKz } from "@/lib/pricing";
 import type { Dominio } from "@/lib/pricing";
 
-const CHAVE = "bilonai-pedido-v1";
-const TOTAL = 8;
+const CHAVE = "bilonai-pedido-v2";
+const TOTAL = 9;
 const ICONE_TIPO: Record<Tipo, typeof Globe> = { site: Globe, loja: ShoppingBag, blog: Newspaper, sistema: LayoutDashboard };
 
 type Fase = "perguntas" | "analise" | "resultado";
@@ -74,8 +76,15 @@ export default function Fluxo() {
     true,
     true,
     true,
+    true,
     !!r.trafego,
   ][passo];
+
+  // Passos opcionais: o botão diz "Saltar" enquanto estiverem vazios.
+  const vazio =
+    (passo === 6 && !r.whatsapp && !r.instagram && !r.facebook && !r.cidade) ||
+    (passo === 7 && !r.denominacao && !r.nif && !r.termos.length && !r.notasTermos);
+  const clausulas = clausulasPara(r);
 
   const irPara = (n: number) => {
     setDir(n > passo ? 1 : -1);
@@ -314,6 +323,58 @@ export default function Fluxo() {
             )}
 
             {passo === 7 && (
+              <Bloco t="Dados legais do teu negócio." s="Opcional. Usamos estes dados no rodapé e na página de termos do teu site.">
+                <div className="grid gap-3 sm:grid-cols-[1.5fr_1fr]">
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-cream/70">Denominação social <span className="text-cream-dim">(se tiveres)</span></span>
+                    <input className="field" value={r.denominacao} onChange={(e) => set("denominacao", e.target.value)} placeholder="Ex.: Doces da Ana, Lda." autoComplete="organization" maxLength={80} />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-cream/70">NIF</span>
+                    <input className="field" value={r.nif} onChange={(e) => set("nif", e.target.value.replace(/\s+/g, "").toUpperCase())} placeholder="Ex.: 5417000000" autoCapitalize="characters" maxLength={20} />
+                  </label>
+                </div>
+
+                <div className="mb-3 mt-8 flex items-end justify-between gap-4">
+                  <span>
+                    <b className="block text-[15px] text-cream">Termos de serviço do teu site</b>
+                    <span className="text-sm text-cream/60">Marca as regras que se aplicam ao teu negócio. Nós redigimos a página completa.</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => set("termos", clausulas.every((c) => r.termos.includes(c.id)) ? [] : clausulas.map((c) => c.id))}
+                    className="shrink-0 rounded-full border border-line px-3 py-2 text-xs text-cream/75 transition-colors hover:border-gold/50 hover:text-cream"
+                  >
+                    {clausulas.every((c) => r.termos.includes(c.id)) ? "Limpar" : "Marcar todas"}
+                  </button>
+                </div>
+                <div className="grid gap-2">
+                  {clausulas.map((c) => {
+                    const on = r.termos.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        role="checkbox"
+                        aria-checked={on}
+                        onClick={() => set("termos", on ? r.termos.filter((x) => x !== c.id) : [...r.termos, c.id])}
+                        className="chip items-start justify-between gap-4 py-3.5 text-sm leading-snug"
+                      >
+                        <span>{textoClausula(c, r)}</span>
+                        <Marca on={on} />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <label className="mt-6 block">
+                  <span className="mb-2 block text-sm text-cream/70">Notas finais <span className="text-cream-dim">(opcional)</span></span>
+                  <textarea className="field min-h-[96px] resize-y" value={r.notasTermos} onChange={(e) => set("notasTermos", e.target.value)} placeholder="Ex.: entregas só no Huambo; pagamento na entrega aceite." maxLength={240} />
+                </label>
+              </Bloco>
+            )}
+
+            {passo === 8 && (
               <Bloco t="Queres mais clientes com anúncios?" s="Facebook, Instagram e Google, num contrato à parte. Não muda o preço do site.">
                 <div className="grid gap-3">
                   {([["sim", "Sim, quero vender mais", "Preparamos o site para anúncios desde o primeiro dia."], ["talvez", "Talvez, quero saber mais", "Explicamos-te como funciona, sem compromisso."], ["nao", "Agora não", "Começamos só com o site."]] as const).map(([id, t, d]) => (
@@ -334,7 +395,7 @@ export default function Fluxo() {
           <div className="mt-10 hidden items-center justify-between lg:flex">
             <button type="button" onClick={anterior} disabled={passo === 0} className="btn-ghost disabled:invisible"><ArrowLeft size={18} /> Voltar</button>
             <button type="button" onClick={seguinte} disabled={!valido} className="btn-gold min-w-[220px]">
-              {passo === TOTAL - 1 ? (<><Sparkles size={18} /> Ver o meu orçamento</>) : passo === 6 && !r.whatsapp && !r.instagram && !r.facebook && !r.cidade ? "Saltar" : (<>Continuar <ArrowRight size={18} /></>)}
+              {passo === TOTAL - 1 ? (<><Sparkles size={18} /> Ver o meu orçamento</>) : vazio ? "Saltar" : (<>Continuar <ArrowRight size={18} /></>)}
             </button>
           </div>
         </div>
@@ -349,7 +410,7 @@ export default function Fluxo() {
             <p className="truncate font-display text-xl text-gold-grad">{r.tipo ? formatKz(orc.total) : "—"}</p>
           </div>
           <button type="button" onClick={seguinte} disabled={!valido} className="btn-gold !px-5 text-[15px]">
-            {passo === TOTAL - 1 ? "Ver orçamento" : passo === 6 && !r.whatsapp && !r.instagram && !r.facebook && !r.cidade ? "Saltar" : "Continuar"} <ArrowRight size={17} />
+            {passo === TOTAL - 1 ? "Ver orçamento" : vazio ? "Saltar" : "Continuar"} <ArrowRight size={17} />
           </button>
         </div>
       </div>

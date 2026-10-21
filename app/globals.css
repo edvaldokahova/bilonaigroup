@@ -39,3 +39,8 @@ body { @apply bg-night text-cream font-sans antialiased; overflow-x: hidden; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* Símbolo de reserva (sem WebGL): os anéis giram em sentidos opostos. Fica fora da regra de movimento reduzido. */
+@keyframes orb-gira { to { transform: rotate(360deg); } }
+.orb-gira { animation: orb-gira 16s linear infinite !important; transform-origin: 0 0; }
+.orb-inv { animation-duration: 11s !important; animation-direction: reverse !important; }

@@ -12,6 +12,7 @@ export default function Privacidade() {
       <ul>
         <li>O formulário funciona inteiramente no teu navegador. As respostas não são enviadas nem guardadas em nenhum servidor nosso.</li>
         <li>Para não perderes o que já escreveste, o navegador guarda um rascunho temporário que desaparece quando fechas o separador.</li>
+        <li>A fatura pró-forma em PDF também é criada no teu navegador, a partir das tuas respostas. Não é enviada para nenhum servidor.</li>
       </ul>
       <h2>Quando é que recebemos a informação</h2>
       <ul>

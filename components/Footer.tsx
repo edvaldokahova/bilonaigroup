@@ -21,7 +21,7 @@ export default function Footer() {
               <a href={waLink()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 text-cream/80 transition-colors hover:text-cream">
                 <WaIcon size={17} className="text-wa" /> {brand.whatsappVisivel}
               </a>
-              <span className="mt-0.5 block pl-[27px] text-xs text-cream-dim">{brand.agente}</span>
+              <span className="mt-0.5 block pl-[27px] text-xs text-cream-dim">{brand.agentePublico}</span>
             </li>
             <li>
               <a href={`mailto:${brand.email}`} className="inline-flex items-center gap-2.5 text-cream/80 transition-colors hover:text-cream">

@@ -2,12 +2,20 @@
 export const brand = {
   nome: "A Bilonai Group",
   assinatura: "Profissionalismo, confiança e vendas.",
-  agente: "Edvaldo Eduardo",
+  agente: "Edvaldo Eduardo", // nome usado só nas páginas legais (termos e privacidade)
+  agentePublico: "Agente oficial", // como o agente aparece no resto do site
   cidade: "Huambo, Angola",
   whatsapp: "244955968159", // formato internacional, sem "+" nem espaços (usado no wa.me)
   whatsappVisivel: "+244 955 968 159",
   email: "suporte@bilonai.com",
   taxaKzPorEur: 1055, // 1 € = 1055 Kz (clientes de Portugal)
+  // Dados de pagamento que aparecem na fatura pró-forma (descarregada no fim do pedido).
+  pagamento: {
+    multicaixaExpress: "923220191",
+    titular: "", // PREENCHER: nome do titular da conta
+    banco: "", // PREENCHER: nome do banco
+    iban: "", // PREENCHER: IBAN (AO06 …)
+  },
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://bilonaigroup.vercel.app",
 };
 
