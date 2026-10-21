@@ -12,9 +12,9 @@ export const brand = {
   // Dados de pagamento que aparecem na fatura pró-forma (descarregada no fim do pedido).
   pagamento: {
     multicaixaExpress: "923220191",
-    titular: "", // PREENCHER: nome do titular da conta
-    banco: "", // PREENCHER: nome do banco
-    iban: "", // PREENCHER: IBAN (AO06 …)
+    titular: "Edvaldo Eugénio Cahova Eduardo",
+    banco: "BAI — Banco Angolano de Investimentos",
+    iban: "AO06 0040 0000 8147 0835 1018 0",
   },
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://bilonaigroup.vercel.app",
 };

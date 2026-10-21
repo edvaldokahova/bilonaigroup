@@ -29,5 +29,4 @@ Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D:
 
 ## Por preencher
 
-- Banco, titular e IBAN em `lib/brand.ts` (`pagamento`). Enquanto estiverem vazios, a fatura mostra só o Multicaixa Express.
 - `NEXT_PUBLIC_SITE_URL` na Vercel quando houver domínio próprio.
