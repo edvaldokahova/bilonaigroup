@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import Faixa from "@/components/Faixa";
 import Montagem from "@/components/Montagem";
 import Portfolio from "@/components/Portfolio";
 import { Servicos, ComoFunciona, Precos, Confianca, CtaFinal } from "@/components/Secoes";
@@ -12,9 +13,10 @@ const jsonLd = {
   name: brand.nome,
   url: brand.url,
   telephone: brand.whatsappVisivel,
+  email: brand.email,
   areaServed: ["AO", "PT"],
   address: { "@type": "PostalAddress", addressLocality: "Huambo", addressCountry: "AO" },
-  description: "Criação de sites, lojas online, blogs e sistemas para empresas.",
+  description: "Estúdio digital: criação de sites, lojas online, blogs e sistemas para empresas, entregues em 24 a 48 horas.",
 };
 
 export default function Home() {
@@ -23,6 +25,7 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
+        <Faixa />
         <Montagem />
         <Portfolio />
         <Servicos />

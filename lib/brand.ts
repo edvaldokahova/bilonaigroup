@@ -6,6 +6,7 @@ export const brand = {
   cidade: "Huambo, Angola",
   whatsapp: "244955968159", // formato internacional, sem "+" nem espaços (usado no wa.me)
   whatsappVisivel: "+244 955 968 159",
+  email: "suporte@bilonai.com",
   taxaKzPorEur: 1055, // 1 € = 1055 Kz (clientes de Portugal)
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://bilonaigroup.vercel.app",
 };

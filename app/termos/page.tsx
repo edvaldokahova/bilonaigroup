@@ -39,7 +39,7 @@ export default function Termos() {
         <li>Alterações depois da entrega são combinadas pelo WhatsApp.</li>
       </ul>
       <h2>6. Contacto</h2>
-      <p>Qualquer dúvida: WhatsApp {brand.whatsappVisivel} ({brand.agente}).</p>
+      <p>Qualquer dúvida: WhatsApp {brand.whatsappVisivel} ({brand.agente}) ou email <a href={`mailto:${brand.email}`} className="text-gold hover:underline">{brand.email}</a>.</p>
     </LegalPage>
   );
 }

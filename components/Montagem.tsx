@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Compass, Palette, PenLine, Code, Rocket } from "lucide-react";
 
 const CAMADAS = [
-  { icon: Compass, t: "Estratégia", d: "Percebemos o teu negócio e o teu cliente antes de desenhar uma linha." },
-  { icon: Palette, t: "Design", d: "Visual premium, à medida da tua marca, pensado primeiro para o telemóvel." },
-  { icon: PenLine, t: "Conteúdo", d: "Textos que vendem, fotos bem tratadas e a mensagem certa em cada secção." },
-  { icon: Code, t: "Tecnologia", d: "Rápido, seguro e optimizado para o Google. Funciona até com rede fraca." },
-  { icon: Rocket, t: "Vendas", d: "Botões de WhatsApp, pedidos e partilha nas redes. O site trabalha por ti." },
+  { icon: Compass, t: "Estratégia", d: "Antes do design, o negócio: quem é o teu cliente, o que o faz comprar e o que te distingue." },
+  { icon: Palette, t: "Design", d: "Direcção visual exclusiva para a tua marca, desenhada primeiro para o ecrã do telemóvel." },
+  { icon: PenLine, t: "Conteúdo", d: "Textos escritos para vender e imagens tratadas com rigor, secção a secção." },
+  { icon: Code, t: "Tecnologia", d: "Carregamento rápido mesmo com rede fraca, segurança e optimização para o Google." },
+  { icon: Rocket, t: "Conversão", d: "Cada página termina numa acção: um pedido, uma reserva, uma conversa no WhatsApp." },
 ];
 
 function Camada({ k }: { k: number }) {
@@ -84,14 +84,14 @@ export default function Montagem() {
   }, []);
 
   return (
-    <section ref={sec} className="relative h-[320vh]" aria-label="Como construímos o teu site">
+    <section ref={sec} id="processo" className="relative h-[320vh]" aria-label="Como construímos o teu site">
       <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_60%_55%,rgba(212,169,54,.12),transparent_70%)]" />
         <div className="wrap relative grid w-full items-center gap-6 lg:grid-cols-[.9fr_1.1fr] lg:gap-10">
           <div className="relative z-10">
-            <p className="kicker">Camada a camada</p>
+            <p className="kicker flex items-center gap-3"><span className="tabular-nums text-cream/35">01</span><span className="h-px w-8 bg-gold/50" />O método</p>
             <h2 className="h-display mt-4 text-[30px] sm:text-5xl lg:mt-5">
-              Cada site é construído como <span className="text-gold-grad italic">uma peça de joalharia</span>.
+              Cada site é lapidado <span className="text-gold-grad italic">camada a camada</span>.
             </h2>
             <ol className="mt-6 space-y-2.5 lg:mt-8">
               {CAMADAS.map((c, k) => {

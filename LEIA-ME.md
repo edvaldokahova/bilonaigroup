@@ -6,7 +6,7 @@ Site 3D da agência, sem base de dados. O cliente responde a 8 perguntas, vê o 
 
 | Quero mudar… | Ficheiro |
 |---|---|
-| Número de WhatsApp, nome do agente, assinatura, taxa Kz→€ | `lib/brand.ts` |
+| Número de WhatsApp, email de suporte, nome do agente, assinatura, taxa Kz→€ | `lib/brand.ts` |
 | Preços (sites, lojas, emails, renovações) | `lib/pricing.ts` (única fonte de preços) |
 | Perguntas, opções, cores, funcionalidades, regra de prazo 24 h / 48 h | `lib/fluxo.ts` |
 | Texto da mensagem que vai para o WhatsApp | `lib/whatsapp.ts` |
@@ -22,7 +22,7 @@ Site 3D da agência, sem base de dados. O cliente responde a 8 perguntas, vê o 
 
 ## Técnica
 
-Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D: o 3D é feito com CSS 3D + WebGL leve (`components/GoldField.tsx`, `components/Montagem.tsx`). Deploy automático na Vercel a cada envio para o GitHub.
+Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D: o 3D é feito com CSS 3D + WebGL leve. A escultura de ouro do símbolo (hero, análise e CTA final) está em `components/Orbita.tsx`; a poeira dourada em `components/GoldField.tsx`; o site a desmontar-se em camadas em `components/Montagem.tsx`. Sem WebGL, em telemóveis fracos, com poupança de dados ou "movimento reduzido", aparece o símbolo estático. Deploy automático na Vercel a cada envio para o GitHub.
 
 ## Por preencher
 

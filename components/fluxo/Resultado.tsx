@@ -87,7 +87,7 @@ export default function Resultado({ r, onEditar }: { r: Respostas; onEditar: () 
               <button type="button" onClick={copiar} className="btn-ghost text-sm">{copiado ? <><Check size={16} /> Copiada</> : <><Copy size={16} /> Copiar texto</>}</button>
               <button type="button" onClick={() => setEnviado(false)} className="btn-ghost text-sm"><ArrowLeft size={16} /> Ver resumo</button>
             </div>
-            <p className="text-xs text-cream-dim">Se o WhatsApp não abrir, copia a mensagem e envia para {brand.whatsappVisivel}.</p>
+            <p className="text-xs leading-relaxed text-cream-dim">Se o WhatsApp não abrir, copia a mensagem e envia para {brand.whatsappVisivel} ou para <a href={`mailto:${brand.email}`} className="text-gold hover:underline">{brand.email}</a>.</p>
           </div>
         </div>
       </div>
@@ -98,14 +98,14 @@ export default function Resultado({ r, onEditar }: { r: Respostas; onEditar: () 
     <div className="pb-40 lg:pb-20">
       <div className="sticky top-0 z-30 border-b border-white/5 bg-night/80 backdrop-blur-xl">
         <div className="wrap flex h-14 items-center justify-between">
-          <Link href="/" aria-label="Início"><Logo size={26} /></Link>
+          <Link href="/" aria-label="Início"><Logo size={26} texto={false} className="sm:hidden" /><Logo size={26} className="hidden sm:inline-flex" /></Link>
           <button type="button" onClick={onEditar} className="inline-flex items-center gap-2 text-sm text-cream-dim hover:text-cream"><PenLine size={15} /> Editar respostas</button>
         </div>
       </div>
 
       <div className="wrap pt-10 lg:pt-16">
         <div className="animate-rise">
-          <p className="kicker flex items-center gap-2"><Sparkles size={14} /> O teu veredito</p>
+          <p className="kicker flex items-center gap-2"><Sparkles size={14} /> A tua proposta</p>
           <h1 className="h-display mt-4 max-w-3xl text-[38px] sm:text-6xl">
             {primeiro ? `${primeiro}, o` : "O"} teu projecto está <span className="text-gold-grad italic">pronto para começar</span>.
           </h1>

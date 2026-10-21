@@ -23,6 +23,7 @@ const config: Config = {
         shine: { "0%": { backgroundPosition: "200% 0" }, "100%": { backgroundPosition: "-200% 0" } },
         spin3: { "0%": { transform: "rotate(0deg)" }, "100%": { transform: "rotate(360deg)" } },
         marquee: { "0%": { transform: "translateX(0)" }, "100%": { transform: "translateX(-50%)" } },
+        drip: { "0%": { transform: "translateY(-100%)" }, "100%": { transform: "translateY(200%)" } },
         screen: { "0%,18%": { transform: "translateY(0)" }, "50%,68%": { transform: "translateY(-50%)" }, "100%": { transform: "translateY(0)" } },
       },
       animation: {
@@ -32,6 +33,7 @@ const config: Config = {
         spin3: "spin3 14s linear infinite",
         "spin3-rev": "spin3 22s linear infinite reverse",
         marquee: "marquee 40s linear infinite",
+        drip: "drip 2.2s cubic-bezier(.6,0,.4,1) infinite",
         screen: "screen 16s ease-in-out infinite",
       },
     },

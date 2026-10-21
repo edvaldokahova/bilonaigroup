@@ -19,7 +19,7 @@ export default function Privacidade() {
         <li>Usamos essas informações apenas para criar o teu projecto e falar contigo sobre ele. Não vendemos nem partilhamos os teus dados com terceiros.</li>
       </ul>
       <h2>Os teus direitos</h2>
-      <p>Podes pedir-nos a qualquer momento que apaguemos a conversa e as informações do teu pedido, pelo WhatsApp {brand.whatsappVisivel}.</p>
+      <p>Podes pedir-nos a qualquer momento que apaguemos a conversa e as informações do teu pedido, pelo WhatsApp {brand.whatsappVisivel} ou pelo email <a href={`mailto:${brand.email}`} className="text-gold hover:underline">{brand.email}</a>.</p>
     </LegalPage>
   );
 }

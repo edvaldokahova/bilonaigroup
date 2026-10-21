@@ -150,7 +150,7 @@ export default function Fluxo() {
         <div onKeyDown={onKey}>
           <div key={passo} className="animate-rise" style={{ animationDuration: dir > 0 ? ".5s" : ".4s" }}>
             {passo === 0 && (
-              <Bloco t="Vamos começar." s="Em 2 minutos tens o teu orçamento. Primeiro, quem és?">
+              <Bloco t="Vamos começar." s="Em 2 minutos recebes um orçamento fechado. Primeiro, apresenta-te.">
                 <label className="block">
                   <span className="mb-2 block text-sm text-cream/70">O teu nome</span>
                   <input className="field" value={r.nome} onChange={(e) => set("nome", e.target.value)} placeholder="Ex.: Ana Silva" autoComplete="name" autoFocus maxLength={60} />
@@ -191,7 +191,7 @@ export default function Fluxo() {
             )}
 
             {passo === 2 && (
-              <Bloco t="Em que ramo trabalhas?" s="Assim adaptamos a estratégia ao teu cliente.">
+              <Bloco t="Em que ramo trabalhas?" s="Assim adaptamos a estratégia ao teu cliente ideal.">
                 <div className="grid grid-cols-2 gap-2">
                   {RAMOS.map((x) => (
                     <button key={x} type="button" aria-pressed={r.ramo === x} onClick={() => set("ramo", x)} className="chip text-sm">{x}</button>
@@ -205,7 +205,7 @@ export default function Fluxo() {
             )}
 
             {passo === 3 && (
-              <Bloco t="Que estilo combina contigo?" s="Vê a prévia a mudar. Podes ajustar tudo depois connosco.">
+              <Bloco t="Que estilo combina contigo?" s="Repara na prévia a mudar. Afinamos tudo contigo antes da entrega.">
                 <div className="grid grid-cols-2 gap-2">
                   {ESTILOS.map((e) => (
                     <button key={e.id} type="button" aria-pressed={r.estilo === e.id} onClick={() => set("estilo", e.id)} className="chip flex-col items-start gap-1 py-4">
@@ -232,7 +232,7 @@ export default function Fluxo() {
             )}
 
             {passo === 4 && (
-              <Bloco t="O que o teu site deve ter?" s="Toca em tudo o que quiseres. Os marcados com «painel» incluem gestão própria.">
+              <Bloco t="O que o teu site deve ter?" s="Escolhe tudo o que precisares. Os itens com «painel» incluem gestão própria.">
                 <div className="grid gap-2 sm:grid-cols-2">
                   {FUNCS.map((f) => {
                     const on = r.funcs.includes(f.id);
@@ -303,7 +303,7 @@ export default function Fluxo() {
             )}
 
             {passo === 6 && (
-              <Bloco t="Como te encontram hoje?" s="Para ligarmos o site às tuas redes. Podes saltar este passo.">
+              <Bloco t="Onde te encontram hoje?" s="Para ligarmos o site às tuas redes. Este passo é opcional.">
                 <div className="grid gap-3">
                   <input className="field" value={r.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} placeholder="WhatsApp do negócio (ex.: 923 000 000)" inputMode="tel" autoComplete="tel" maxLength={25} />
                   <input className="field" value={r.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="Instagram (ex.: @docesdaana)" autoCapitalize="none" maxLength={40} />
