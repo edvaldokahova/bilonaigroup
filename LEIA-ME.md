@@ -29,4 +29,4 @@ Next.js 14 (App Router), React 18, Tailwind 3.4, TypeScript. Sem bibliotecas 3D:
 
 ## Por preencher
 
-- `NEXT_PUBLIC_SITE_URL` na Vercel quando houver domínio próprio.
+- Domínio oficial: **service.bilonai.com** (já é o valor por omissão em `lib/brand.ts`). Falta adicioná-lo ao projecto na Vercel (Settings → Domains) e criar o registo DNS que a Vercel indicar.

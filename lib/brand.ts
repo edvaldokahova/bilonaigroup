@@ -16,7 +16,7 @@ export const brand = {
     banco: "BAI — Banco Angolano de Investimentos",
     iban: "AO06 0040 0000 8147 0835 1018 0",
   },
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://bilonaigroup.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://service.bilonai.com",
 };
 
 export function waLink(texto?: string) {
