@@ -3,8 +3,8 @@
 // "hero": abre do logótipo plano para um giroscópio de ouro e segue o rato e o scroll.
 // "analise": faz o caminho inverso, o giroscópio fecha-se no logótipo à medida que `progresso` vai de 0 a 1.
 // "cta": giroscópio livre, mais calmo.
-// Corre sempre que o navegador tem WebGL: em telemóveis fracos ou com poupança de dados baixa a qualidade,
-// com "movimento reduzido" anda mais devagar. Sem WebGL, o símbolo em SVG gira em CSS (nunca fica parado).
+// Corre sempre que o navegador tem WebGL, na resolução real do ecrã (até 3x no telemóvel). Se o aparelho não
+// aguentar (fotogramas lentos), a resolução desce sozinha. Com "movimento reduzido" anda mais devagar. Sem WebGL, o símbolo em SVG gira em CSS (nunca fica parado).
 import { useEffect, useRef, useState } from "react";
 
 type Modo = "hero" | "analise" | "cta";
@@ -140,11 +140,11 @@ const PUPILA = 0.225;
 
 const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
-/** Aparelho modesto (poucos núcleos, pouca memória ou poupança de dados) → menos polígonos e resolução 1x. */
+/** Só aparelhos mesmo fracos (2 núcleos, 1 GB) ou com poupança de dados começam com resolução reduzida. */
 function aparelhoLeve() {
   try {
     const n = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    return !!n.connection?.saveData || (n.hardwareConcurrency || 4) <= 4 || (n.deviceMemory ?? 4) < 4;
+    return !!n.connection?.saveData || (n.hardwareConcurrency || 4) <= 2 || (n.deviceMemory ?? 4) <= 1;
   } catch {
     return true;
   }
@@ -165,7 +165,7 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
     try { calmo = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { /* sem matchMedia */ }
     let gl: WebGLRenderingContext | null = null;
     try {
-      gl = (c.getContext("webgl", { alpha: true, antialias: !leve, premultipliedAlpha: true, powerPreference: mobile ? "low-power" : "high-performance" }) ||
+      gl = (c.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: mobile ? "low-power" : "high-performance" }) ||
         c.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: true })) as WebGLRenderingContext | null;
     } catch {
       gl = null;
@@ -198,9 +198,10 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, ib); g.bufferData(g.ELEMENT_ARRAY_BUFFER, m.idx, g.STATIC_DRAW);
       return { vb, nb, ib, n: m.idx.length };
     };
-    const q = leve ? 0.45 : mobile ? 0.6 : 1;
+    const q = leve ? 0.75 : 1; // a malha é pequena: detalhe completo não pesa
+
     const aneis = ANEIS.map((a) => subir(arco(a.R, a.r, a.a0, a.a1, Math.round(150 * q), Math.round(22 * q))));
-    const orbita = subir(arco(1.55, 0.007, 0, Math.PI * 2, Math.round(160 * q), 8));
+    const orbita = subir(arco(1.55, 0.009, 0, Math.PI * 2, Math.round(160 * q), 8));
     const bola = subir(esfera(Math.round(36 * q), Math.round(24 * q)));
 
     g.enable(g.DEPTH_TEST);
@@ -209,7 +210,8 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
     g.enableVertexAttribArray(aP);
     g.enableVertexAttribArray(aN);
 
-    const dpr = Math.min(window.devicePixelRatio || 1, leve ? 1 : mobile ? 1.5 : 2);
+    // Resolução = a do ecrã (o canvas do telemóvel é pequeno, 3x continua leve); baixa sozinha se ficar lento.
+    let dpr = Math.min(window.devicePixelRatio || 1, leve ? 1.5 : mobile ? 3 : 2);
     let asp = 1;
     const resize = () => {
       const w = c.clientWidth, h = c.clientHeight;
@@ -306,13 +308,27 @@ export default function Orbita({ modo = "hero", progresso = 0, className = "" }:
       }
     };
 
+    // Afinação automática: mede os primeiros fotogramas; abaixo de ~40 fps desce a resolução um degrau (até 1x).
+    let amostras = 0, soma = 0, ultimo = 0;
+    const afinar = (agora: number) => {
+      if (ultimo && amostras < 1000) {
+        const d = agora - ultimo;
+        if (d < 200) { soma += d; amostras++; }
+        if (amostras === 45) {
+          if (soma / amostras > 25 && dpr > 1) { dpr = Math.max(1, dpr * 0.7); resize(); amostras = 0; soma = 0; }
+          else amostras = 1000;
+        }
+      }
+      ultimo = agora;
+    };
+
     let visivel = true;
     let raf = 0;
-    const loop = () => { frame(); raf = visivel && !document.hidden ? requestAnimationFrame(loop) : 0; };
+    const loop = (agora: number) => { afinar(agora); frame(); raf = visivel && !document.hidden ? requestAnimationFrame(loop) : 0; };
     const start = () => { if (!raf) raf = requestAnimationFrame(loop); };
     const io = new IntersectionObserver(([e]) => { visivel = e.isIntersecting; if (visivel) start(); });
     io.observe(c);
-    const onVis = () => { if (!document.hidden) start(); };
+    const onVis = () => { ultimo = 0; if (!document.hidden) start(); };
     document.addEventListener("visibilitychange", onVis);
     frame();
     setPronto(true);
